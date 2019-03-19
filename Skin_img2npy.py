@@ -23,7 +23,10 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.models import Model
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
 from tensorflow.keras.metrics import categorical_accuracy, top_k_categorical_accuracy
+from keras.applications.densenet import DenseNet201
 import keras
+import keras.backend as K
+from keras import layers
 seed(101)
 set_random_seed(101)
 
@@ -294,7 +297,7 @@ class Skin_DataProcess_2():
 
         return df_train, df_val
 
-    def DataTrain(self):
+    def DataTrain_MobileNet(self):
 
         # Set up the generator
         train_path = self.base_dir + '/train_dir'
@@ -374,9 +377,109 @@ class Skin_DataProcess_2():
                                       epochs=30, verbose=1,
                                       callbacks=callbacks_list)
 
+    def DataTrain_DenseNet(self):
+
+        # Set up the generator
+        train_path = self.base_dir + '/train_dir'
+        valid_path = self.base_dir + '/val_dir'
+
+        # Load the df training data
+        df_train, df_val = self.DataRead()
+
+        # The ratio between training and testing is close to 9:1
+        num_train_samples = len(df_train)
+        num_val_samples = len(df_val)
+        train_batch_size = 10
+        val_batch_size = 10
+        image_size = 224
+        train_steps = np.ceil(num_train_samples / train_batch_size)
+        val_steps = np.ceil(num_val_samples / val_batch_size)
+        print("The df_train is ", df_train.shape)
+        print("The df_val is ", df_val.shape)
+        print("The training step is ", train_steps)
+        print("The validation step is ", val_steps)
+
+        # Data generation and data from directory
+        datagen = ImageDataGenerator(preprocessing_function=tensorflow.keras.applications.mobilenet.preprocess_input)
+        train_batches = datagen.flow_from_directory(train_path,
+                                                    target_size=(image_size, image_size),
+                                                    batch_size=train_batch_size)
+        valid_batches = datagen.flow_from_directory(valid_path,
+                                                    target_size=(image_size, image_size),
+                                                    batch_size=val_batch_size)
+        print("The train batches are ", train_batches)
+        print("The valid batches are ", valid_batches)
+
+        # Load the pretrained model
+        pre_trained_model = DenseNet201(input_shape=(224, 224, 3), include_top=False, weights="imagenet")
+        for layer in pre_trained_model.layers:
+            print(layer.name)
+            if hasattr(layer, 'moving_mean') and hasattr(layer, 'moving_variance'):
+                layer.trainable = True
+                K.eval(K.update(layer.moving_mean, K.zeros_like(layer.moving_mean)))
+                K.eval(K.update(layer.moving_variance, K.zeros_like(layer.moving_variance)))
+            else:
+                layer.trainable = False
+        print(len(pre_trained_model.layers))
+
+        # Last few layers
+        last_layer = pre_trained_model.get_layer('relu')
+        print('last layer output shape:', last_layer.output_shape)
+        last_output = last_layer.output
+
+        # Define the model
+        # Flatten the output layer to 1 dimension
+        x = layers.GlobalMaxPooling2D()(last_output)
+        # Add a fully connected layer with 512 hidden units and ReLU activation
+        x = layers.Dense(512, activation='relu')(x)
+        # Add a dropout rate of 0.7
+        x = layers.Dropout(0.5)(x)
+        # Add a final sigmoid layer for classification
+        x = layers.Dense(7, activation='softmax')(x)
+
+        # Configure and compile the model
+        model = Model(pre_trained_model.input, x)
+
+        # The last 23 layers of the model will be trained.
+        for layer in model.layers[:-23]:
+            layer.trainable = False
+
+        def top_3_accuracy(y_true, y_pred):
+            return top_k_categorical_accuracy(y_true, y_pred, k=3)
+
+        def top_2_accuracy(y_true, y_pred):
+            return top_k_categorical_accuracy(y_true, y_pred, k=2)
+
+        model.compile(Adam(lr=0.01), loss='categorical_crossentropy',
+                      metrics=[categorical_accuracy, top_2_accuracy, top_3_accuracy])
+        print(valid_batches.class_indices)
+        class_weights = {
+            0: 1.0,  # akiec
+            1: 1.0,  # bcc
+            2: 1.0,  # bkl
+            3: 1.0,  # df
+            4: 3.0,  # mel # Try to make the model more sensitive to Melanoma.
+            5: 1.0,  # nv
+            6: 1.0,  # vasc
+        }
+
+        filepath = self.base_dir + "model.h7"
+        checkpoint = ModelCheckpoint(filepath, monitor='val_top_3_accuracy', verbose=1,
+                                     save_best_only=True, mode='max')
+        reduce_lr = ReduceLROnPlateau(monitor='val_top_3_accuracy', factor=0.5, patience=2,
+                                      verbose=1, mode='max', min_lr=0.00001)
+        callbacks_list = [checkpoint, reduce_lr]
+        history = model.fit_generator(train_batches,
+                                      steps_per_epoch=train_steps,
+                                      class_weight=class_weights,
+                                      validation_data=valid_batches,
+                                      validation_steps=val_steps,
+                                      epochs=30, verbose=1,
+                                      callbacks=callbacks_list)
+
 if __name__ == "__main__":
 
     test = Skin_DataProcess_2()
     # test.DataFolder()
     # test.DataRead()
-    test.DataTrain()
+    test.DataTrain_MobileNet()
