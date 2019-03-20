@@ -38,6 +38,8 @@ class Skin_DataProcess_2():
         self.dataset_dir = sys.argv[1] # '/home/mgs/PycharmProjects/Skin_DL/skin-cancer-mnist-ham10000/'
         self.base_dir = sys.argv[2] # '/home/mgs/PycharmProjects/Skin_DL/skin_base/'
 
+        # HAM10000_images_part_1.zip
+        # /datacommons/plusds/skin_cancer
         # self.dataset_dir = '/home/mgs/PycharmProjects/Skin_DL/skin-cancer-mnist-ham10000/'
         # self.base_dir = '/home/mgs/PycharmProjects/Skin_DL/Skin_server_test/'
 
