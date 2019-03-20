@@ -12,9 +12,9 @@ import numpy as np
 import os
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import train_test_split
-import itertools
+# import itertools
 import shutil
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import tensorflow
 from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.optimizers import Adam
@@ -27,6 +27,7 @@ from keras.applications.densenet import DenseNet201
 import keras
 import keras.backend as K
 from keras import layers
+import sys
 seed(101)
 set_random_seed(101)
 
@@ -34,14 +35,19 @@ class Skin_DataProcess_2():
 
     def __init__(self):
 
-        self.dataset_dir = '/home/mgs/PycharmProjects/Skin_DL/skin-cancer-mnist-ham10000/'
-        self.base_dir = '/home/mgs/PycharmProjects/Skin_DL/skin_base/'
+        self.dataset_dir = sys.argv[1] # '/home/mgs/PycharmProjects/Skin_DL/skin-cancer-mnist-ham10000/'
+        self.base_dir = sys.argv[2] # '/home/mgs/PycharmProjects/Skin_DL/skin_base/'
+
+        # self.dataset_dir = '/home/mgs/PycharmProjects/Skin_DL/skin-cancer-mnist-ham10000/'
+        # self.base_dir = '/home/mgs/PycharmProjects/Skin_DL/Skin_server_test/'
+
+        # /home/mgs/PycharmProjects/Skin_DL/Skin_server_test
 
     def DataFolder(self):
 
         flag_createFolder = input("Do you want to create intialized folder (1/0)?")
 
-        if flag_createFolder == 1:
+        if flag_createFolder == '1':
             dataset_dir = self.dataset_dir
             base_dir = self.base_dir
             os.listdir(dataset_dir)
@@ -204,6 +210,7 @@ class Skin_DataProcess_2():
         flag_Createimg = input("Do you want to create the images? (1/0)")
 
         if flag_Createimg == '1':
+            print("Create images in the folder")
             # Transfer the train images to a new folder
             train_dir = os.path.join(self.base_dir, 'train_dir')
             for image in train_list:
@@ -211,14 +218,14 @@ class Skin_DataProcess_2():
                 label = df_data.loc[image, 'dx']
                 if fname in folder_1:
                     # source path to image
-                    src = os.path.join('/home/mgs/PycharmProjects/Skin_DL/skin-cancer-mnist-ham10000/HAM10000_images_part_1', fname)
+                    src = os.path.join(self.dataset_dir + 'HAM10000_images_part_1', fname)
                     # destination path to image
                     dst = os.path.join(train_dir, label, fname)
                     # copy the image from the source to the destination
                     shutil.copyfile(src, dst)
                 if fname in folder_2:
                     # source path to image
-                    src = os.path.join('/home/mgs/PycharmProjects/Skin_DL/skin-cancer-mnist-ham10000/HAM10000_images_part_2', fname)
+                    src = os.path.join(self.dataset_dir + 'HAM10000_images_part_2', fname)
                     # destination path to image
                     dst = os.path.join(train_dir, label, fname)
                     # copy the image from the source to the destination
@@ -231,14 +238,14 @@ class Skin_DataProcess_2():
                 label = df_data.loc[image, 'dx']
                 if fname in folder_1:
                     # source path to image
-                    src = os.path.join('/home/mgs/PycharmProjects/Skin_DL/skin-cancer-mnist-ham10000/HAM10000_images_part_1', fname)
+                    src = os.path.join(self.dataset_dir + 'HAM10000_images_part_1', fname)
                     # destination path to image
                     dst = os.path.join(val_dir, label, fname)
                     # copy the image from the source to the destination
                     shutil.copyfile(src, dst)
                 if fname in folder_2:
                     # source path to image
-                    src = os.path.join('/home/mgs/PycharmProjects/Skin_DL/skin-cancer-mnist-ham10000/HAM10000_images_part_2', fname)
+                    src = os.path.join(self.dataset_dir + 'HAM10000_images_part_2', fname)
                     # destination path to image
                     dst = os.path.join(val_dir, label, fname)
                     # copy the image from the source to the destination
@@ -331,7 +338,7 @@ class Skin_DataProcess_2():
         print("The valid batches are ", valid_batches)
 
         mobile = tensorflow.keras.applications.mobilenet.MobileNet()
-        mobile.summary()
+        # mobile.summary()
 
         ''' Create a new architecture
         1. Exclude the last 5 layers of the above model
@@ -346,13 +353,16 @@ class Skin_DataProcess_2():
         # The last 23 layers of the model will be trained.
         for layer in model.layers[:-23]:
             layer.trainable = False
+
         def top_3_accuracy(y_true, y_pred):
             return top_k_categorical_accuracy(y_true, y_pred, k = 3)
+
         def top_2_accuracy(y_true, y_pred):
             return top_k_categorical_accuracy(y_true, y_pred, k = 2)
 
         model.compile(Adam(lr=0.01), loss = 'categorical_crossentropy', metrics=[categorical_accuracy, top_2_accuracy, top_3_accuracy])
         print(valid_batches.class_indices)
+
         class_weights = {
             0: 1.0,  # akiec
             1: 1.0,  # bcc
@@ -361,9 +371,9 @@ class Skin_DataProcess_2():
             4: 3.0,  # mel # Try to make the model more sensitive to Melanoma.
             5: 1.0,  # nv
             6: 1.0,  # vasc
-        }
+                        }
 
-        filepath = self.base_dir + "model.h7"
+        filepath = self.base_dir + "model_MobileNet.h5"
         checkpoint = ModelCheckpoint(filepath, monitor='val_top_3_accuracy', verbose=1,
                                      save_best_only=True, mode='max')
         reduce_lr = ReduceLROnPlateau(monitor='val_top_3_accuracy', factor=0.5, patience=2,
@@ -377,6 +387,11 @@ class Skin_DataProcess_2():
                                       epochs=30, verbose=1,
                                       callbacks=callbacks_list)
 
+    def DataTest_MobileNet(self):
+
+        # Test the model from the MobileNet
+        a = 1
+
     def DataTrain_DenseNet(self):
 
         # Set up the generator
@@ -386,6 +401,7 @@ class Skin_DataProcess_2():
         # Load the df training data
         df_train, df_val = self.DataRead()
 
+        print("check")
         # The ratio between training and testing is close to 9:1
         num_train_samples = len(df_train)
         num_val_samples = len(df_val)
@@ -394,21 +410,15 @@ class Skin_DataProcess_2():
         image_size = 224
         train_steps = np.ceil(num_train_samples / train_batch_size)
         val_steps = np.ceil(num_val_samples / val_batch_size)
-        print("The df_train is ", df_train.shape)
-        print("The df_val is ", df_val.shape)
-        print("The training step is ", train_steps)
-        print("The validation step is ", val_steps)
 
         # Data generation and data from directory
-        datagen = ImageDataGenerator(preprocessing_function=tensorflow.keras.applications.mobilenet.preprocess_input)
+        datagen = ImageDataGenerator(preprocessing_function = tensorflow.keras.applications.mobilenet.preprocess_input)
         train_batches = datagen.flow_from_directory(train_path,
                                                     target_size=(image_size, image_size),
                                                     batch_size=train_batch_size)
         valid_batches = datagen.flow_from_directory(valid_path,
                                                     target_size=(image_size, image_size),
                                                     batch_size=val_batch_size)
-        print("The train batches are ", train_batches)
-        print("The valid batches are ", valid_batches)
 
         # Load the pretrained model
         pre_trained_model = DenseNet201(input_shape=(224, 224, 3), include_top=False, weights="imagenet")
@@ -420,11 +430,9 @@ class Skin_DataProcess_2():
                 K.eval(K.update(layer.moving_variance, K.zeros_like(layer.moving_variance)))
             else:
                 layer.trainable = False
-        print(len(pre_trained_model.layers))
 
         # Last few layers
         last_layer = pre_trained_model.get_layer('relu')
-        print('last layer output shape:', last_layer.output_shape)
         last_output = last_layer.output
 
         # Define the model
@@ -439,7 +447,7 @@ class Skin_DataProcess_2():
 
         # Configure and compile the model
         model = Model(pre_trained_model.input, x)
-
+        # model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
         # The last 23 layers of the model will be trained.
         for layer in model.layers[:-23]:
             layer.trainable = False
@@ -450,9 +458,8 @@ class Skin_DataProcess_2():
         def top_2_accuracy(y_true, y_pred):
             return top_k_categorical_accuracy(y_true, y_pred, k=2)
 
-        model.compile(Adam(lr=0.01), loss='categorical_crossentropy',
-                      metrics=[categorical_accuracy, top_2_accuracy, top_3_accuracy])
-        print(valid_batches.class_indices)
+        optimizer = Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=True)
+        model.compile(loss='categorical_crossentropy',  optimizer = optimizer, metrics=[categorical_accuracy, top_2_accuracy, top_3_accuracy])
         class_weights = {
             0: 1.0,  # akiec
             1: 1.0,  # bcc
@@ -463,7 +470,7 @@ class Skin_DataProcess_2():
             6: 1.0,  # vasc
         }
 
-        filepath = self.base_dir + "model.h7"
+        filepath = self.base_dir + "model_DenseNet.h5"
         checkpoint = ModelCheckpoint(filepath, monitor='val_top_3_accuracy', verbose=1,
                                      save_best_only=True, mode='max')
         reduce_lr = ReduceLROnPlateau(monitor='val_top_3_accuracy', factor=0.5, patience=2,
@@ -474,12 +481,13 @@ class Skin_DataProcess_2():
                                       class_weight=class_weights,
                                       validation_data=valid_batches,
                                       validation_steps=val_steps,
-                                      epochs=30, verbose=1,
+                                      epochs = 30, verbose = 1,
                                       callbacks=callbacks_list)
 
 if __name__ == "__main__":
 
     test = Skin_DataProcess_2()
-    # test.DataFolder()
+    test.DataFolder()
     # test.DataRead()
     test.DataTrain_MobileNet()
+    # test.DataTrain_DenseNet()
