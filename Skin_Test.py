@@ -25,9 +25,9 @@ class Skin_Server():
         print("The first argv[1] is the folder path where the csv file locates \n ")
         print("The first argv[2] is the folder path where the base folder locates \n ")
         print("The first argv[3] is the folder path where the images source folder locates \n ")
-        self.CsvDir = '/home/mgs/PycharmProjects/Skin_DL/skin-cancer-mnist-ham10000/' # sys.argv[1]       # The folder where the csv file locates
-        self.BaseDir = '/home/mgs/PycharmProjects/Skin_DL/test/' # sys.argv[2]      # The base folder created by user
-        self.src_folder = '/home/mgs/PycharmProjects/Skin_DL/images/' # sys.argv[3]   # The folder where the images locate
+        self.CsvDir = sys.argv[1]       # The folder where the csv file locates '/home/mgs/PycharmProjects/Skin_DL/skin-cancer-mnist-ham10000/'
+        self.BaseDir = sys.argv[2]      # The base folder created by user '/home/mgs/PycharmProjects/Skin_DL/test/'
+        self.src_folder = sys.argv[3]   # The folder where the images locate '/home/mgs/PycharmProjects/Skin_DL/images/'
         self.skin_df = pd.read_csv(os.path.join(self.CsvDir, 'HAM10000_metadata.csv'))
 
     def CreateFolder(self):
