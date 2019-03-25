@@ -1,3 +1,5 @@
+
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -23,9 +25,9 @@ class Skin_Server():
         print("The first argv[1] is the folder path where the csv file locates \n ")
         print("The first argv[2] is the folder path where the base folder locates \n ")
         print("The first argv[3] is the folder path where the images source folder locates \n ")
-        self.CsvDir = sys.argv[1]       # The folder where the csv file locates
-        self.BaseDir = sys.argv[2]      # The base folder created by user
-        self.src_folder = sys.argv[3]   # The folder where the images locate
+        self.CsvDir = '/home/mgs/PycharmProjects/Skin_DL/skin-cancer-mnist-ham10000/' # sys.argv[1]       # The folder where the csv file locates
+        self.BaseDir = '/home/mgs/PycharmProjects/Skin_DL/test/' # sys.argv[2]      # The base folder created by user
+        self.src_folder = '/home/mgs/PycharmProjects/Skin_DL/images/' # sys.argv[3]   # The folder where the images locate
         self.skin_df = pd.read_csv(os.path.join(self.CsvDir, 'HAM10000_metadata.csv'))
 
     def CreateFolder(self):
@@ -294,21 +296,13 @@ class Skin_Server():
         train_batch_size = 10
         val_batch_size = 10
         # image_size = 224
-        img_h = 256
-        img_w = 192
+        img_h = 224
+        img_w = 224
         train_steps = np.ceil(num_train_samples / train_batch_size)
         val_steps = np.ceil(num_val_samples / val_batch_size)
 
         # Set up the data generator
-        datagen = ImageDataGenerator(preprocessing_function = keras.applications.mobilenet.preprocess_input,
-                                    rotation_range=180,
-                                    width_shift_range=0.1,
-                                    height_shift_range=0.1,
-                                    zoom_range=0.1,
-                                    horizontal_flip=True,
-                                    vertical_flip=True,
-                                    #brightness_range=(0.9,1.1),
-                                    fill_mode='nearest')
+        datagen = ImageDataGenerator(preprocessing_function = keras.applications.mobilenet.preprocess_input)
 
         # Create the batches for training
         train_batches = datagen.flow_from_directory(train_path,
@@ -369,7 +363,7 @@ class Skin_Server():
                                       callbacks=callbacks_list)
         model.save(filepath)
 
-        # Test the model -- validation
+        # Test the model
         val_loss, val_cat_acc, val_top_2_acc, val_top_3_acc = model.evaluate_generator(valid_batches, steps=len(self.df_val))
         print('val_loss:', val_loss)
         print('val_cat_acc:', val_cat_acc)
@@ -377,7 +371,7 @@ class Skin_Server():
         print('val_top_3_acc:', val_top_3_acc)
         print("The new model")
 
-        # Test the model -- testing
+        # Test the model
         val_loss, val_cat_acc, val_top_2_acc, val_top_3_acc = model.evaluate_generator(test_batches, steps=len(self.df_test))
         print('val_loss:', val_loss)
         print('val_cat_acc:', val_cat_acc)
@@ -392,15 +386,95 @@ class Skin_Server():
         print('val_top_2_acc:', val_top_2_acc)
         print('val_top_3_acc:', val_top_3_acc)
 
-
     def DataAug(self):
 
-        # Data Augmentation for further application
-        a = 1
+        # Show the length of the training folder
+        print(len(os.listdir(self.BaseDir + 'train_dir/nv')))
+        print(len(os.listdir(self.BaseDir + 'train_dir/mel')))
+        print(len(os.listdir(self.BaseDir + 'train_dir/bkl')))
+        print(len(os.listdir(self.BaseDir + 'train_dir/bcc')))
+        print(len(os.listdir(self.BaseDir + 'train_dir/akiec')))
+        print(len(os.listdir(self.BaseDir + 'train_dir/vasc')))
+        print(len(os.listdir(self.BaseDir + 'train_dir/df')))
+
+        # note that we are not augmenting class 'nv'
+        class_list = ['mel', 'bkl', 'bcc', 'akiec', 'vasc', 'df']
+
+        flag_aug = input("Do you want to augment the data set ? (1/0)")
+
+        if flag_aug == '1':
+
+            aug_dir = self.BaseDir + 'aug_dir/'
+
+            for item in class_list:
+
+                print(os.path.exists(aug_dir))
+                if os.path.exists(aug_dir):
+                    shutil.rmtree(aug_dir)
+                else:
+                    os.mkdir(aug_dir)
+
+                # print(aug_dir)
+                img_dir = os.path.join(aug_dir, 'img_dir/')
+                # print(img_dir)
+                os.mkdir(img_dir)
+                img_class = item
+                img_list = os.listdir(self.BaseDir + 'train_dir/' + img_class)
+
+                for fname in img_list:
+                    # source path to image
+                    src = os.path.join(self.BaseDir + 'train_dir/' + img_class, fname)
+                    # destination path to image
+                    dst = os.path.join(img_dir, fname)
+                    # copy the image from the source to the destination
+                    shutil.copyfile(src, dst)
+
+                # point to a dir containing the images and not to the images themselves
+                path = aug_dir
+                save_path = self.BaseDir + 'train_dir/' + img_class
+
+                # Create a data generator
+                datagen = ImageDataGenerator(
+                        rotation_range=180,
+                        width_shift_range=0.1,
+                        height_shift_range=0.1,
+                        zoom_range=0.1,
+                        horizontal_flip=True,
+                        vertical_flip=True,
+                        fill_mode='nearest')
+
+                # The batch size for data augmentation
+                batch_size = 50
+                aug_datagen = datagen.flow_from_directory(path,
+                                                          save_to_dir=save_path,
+                                                          save_format='jpg',
+                                                          target_size=(224, 224),
+                                                          batch_size=batch_size)
+
+                # We want all the classes have similar training samples as 6000
+                num_aug_images_wanted = 6000
+                num_files = len(os.listdir(img_dir))
+                num_batches = int(np.ceil((num_aug_images_wanted - num_files) / batch_size))
+
+                print("Augment the image set")
+                for i in range(0, num_batches):
+                    imgs, labels = next(aug_datagen)
+
+                shutil.rmtree(aug_dir)
+
+        print(len(os.listdir(self.BaseDir + 'train_dir/nv')))
+        print(len(os.listdir(self.BaseDir + 'train_dir/mel')))
+        print(len(os.listdir(self.BaseDir + 'train_dir/bkl')))
+        print(len(os.listdir(self.BaseDir + 'train_dir/bcc')))
+        print(len(os.listdir(self.BaseDir + 'train_dir/akiec')))
+        print(len(os.listdir(self.BaseDir + 'train_dir/vasc')))
+        print(len(os.listdir(self.BaseDir + 'train_dir/df')))
+
 if __name__ == "__main__":
 
     test = Skin_Server()
     test.CreateFolder()
     test.DataProcess()
     test.SaveImgToFolder()
-    test.ModelTrain()
+    test.DataAug()
+    test.ModelTrain()l
