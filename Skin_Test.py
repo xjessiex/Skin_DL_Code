@@ -477,4 +477,4 @@ if __name__ == "__main__":
     test.DataProcess()
     test.SaveImgToFolder()
     test.DataAug()
-    test.ModelTrain()l
+    test.ModelTrain()
