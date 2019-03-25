@@ -1,5 +1,6 @@
 '''
 ref: https://github.com/hoang-ho/Skin_Lesions_Classification_DCNNs/blob/master/Skin_Cancer_EDA.ipynb
+ref: https://github.com/hoang-ho/Skin_Lesions_Classification_DCNNs
 Algorithm 1: Train with data augmentation
     DataPreprocess: We need to save the data into the npy file
 Algorithm 2: Train without data augmentation
