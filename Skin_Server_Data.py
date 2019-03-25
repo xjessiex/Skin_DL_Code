@@ -7,14 +7,12 @@ import sys
 
 if __name__ == "__main__":
 
-    DatasetDir = sys.argv[1] # '/home/mgs/PycharmProjects/Skin_DL/skin-cancer-mnist-ham10000/' # sys.argv[1] # '/home/mgs/PycharmProjects/Skin_DL/skin-cancer-mnist-ham10000/'
+    DatasetDir = sys.argv[1]    # '/home/mgs/PycharmProjects/Skin_DL/skin-cancer-mnist-ham10000/'
     CsvDir = DatasetDir
-    BaseDir = sys.argv[2] # '/home/mgs/PycharmProjects/Skin_DL/test/' # sys.argv[2] # '/home/mgs/PycharmProjects/Skin_DL/test/'
+    BaseDir = sys.argv[2]       # '/home/mgs/PycharmProjects/Skin_DL/test/'
     skin_df = pd.read_csv(os.path.join(CsvDir, 'HAM10000_metadata.csv')) # load in the data
-    src_folder = sys.argv[3] # '/home/mgs/PycharmProjects/Skin_DL/images/' # sys.argv[3]  # /home/mgs/PycharmProjects/Skin_DL/images/
-
+    src_folder = sys.argv[3]    # '/home/mgs/PycharmProjects/Skin_DL/images/' # sys.argv[3]  # /home/mgs/PycharmProjects/Skin_DL/images/
     flag_createFolder = input("Do you want to create the initialized folder (1/0)?")
-
     base_dir = BaseDir
     train_dir = os.path.join(base_dir, 'train_dir')
     val_dir = os.path.join(base_dir, 'val_dir')
