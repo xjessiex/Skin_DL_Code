@@ -42,129 +42,129 @@ class Skin_Server():
             os.mkdir(self.val_dir)
             os.mkdir(self.test_dir)
 
-            nv = os.path.join(train_dir, 'nv')
+            nv = os.path.join(self.train_dir, 'nv')
             if os.path.isdir(nv):
                 print("folder training nv is finished")
             else:
                 os.mkdir(nv)
 
-            mel = os.path.join(train_dir, 'mel')
+            mel = os.path.join(self.train_dir, 'mel')
             if os.path.isdir(mel):
                 print("folder training mel is finished")
             else:
                 os.mkdir(mel)
 
-            bkl = os.path.join(train_dir, 'bkl')
+            bkl = os.path.join(self.train_dir, 'bkl')
             if os.path.isdir(bkl):
                 print("folder training bkl is finished")
             else:
                 os.mkdir(bkl)
 
-            bcc = os.path.join(train_dir, 'bcc')
+            bcc = os.path.join(self.train_dir, 'bcc')
             if os.path.isdir(bcc):
                 print("folder training bcc is finished")
             else:
                 os.mkdir(bcc)
 
-            akiec = os.path.join(train_dir, 'akiec')
+            akiec = os.path.join(self.train_dir, 'akiec')
             if os.path.isdir(akiec):
                 print("folder training akiec is finished")
             else:
                 os.mkdir(akiec)
 
-            vasc = os.path.join(train_dir, 'vasc')
+            vasc = os.path.join(self.train_dir, 'vasc')
             if os.path.isdir(vasc):
                 print("folder training vasc is finished")
             else:
                 os.mkdir(vasc)
 
-            df = os.path.join(train_dir, 'df')
+            df = os.path.join(self.train_dir, 'df')
             if os.path.isdir(df):
                 print("folder training df is finished")
             else:
                 os.mkdir(df)
 
             # Validation
-            nv = os.path.join(val_dir, 'nv')
+            nv = os.path.join(self.val_dir, 'nv')
             if os.path.isdir(nv):
                 print("folder testing nv is finished")
             else:
                 os.mkdir(nv)
 
-            mel = os.path.join(val_dir, 'mel')
+            mel = os.path.join(self.val_dir, 'mel')
             if os.path.isdir(mel):
                 print("folder testing mel is finished")
             else:
                 os.mkdir(mel)
 
-            bkl = os.path.join(val_dir, 'bkl')
+            bkl = os.path.join(self.val_dir, 'bkl')
             if os.path.isdir(bkl):
                 print("folder testing bkl is finished")
             else:
                 os.mkdir(bkl)
 
-            bcc = os.path.join(val_dir, 'bcc')
+            bcc = os.path.join(self.val_dir, 'bcc')
             if os.path.isdir(bcc):
                 print("folder testing bcc is finished")
             else:
                 os.mkdir(bcc)
 
-            akiec = os.path.join(val_dir, 'akiec')
+            akiec = os.path.join(self.val_dir, 'akiec')
             if os.path.isdir(akiec):
                 print("folder testing akiec is finished")
             else:
                 os.mkdir(akiec)
 
-            vasc = os.path.join(val_dir, 'vasc')
+            vasc = os.path.join(self.val_dir, 'vasc')
             if os.path.isdir(vasc):
                 print("folder testing vasc is finished")
             else:
                 os.mkdir(vasc)
 
-            df = os.path.join(val_dir, 'df')
+            df = os.path.join(self.val_dir, 'df')
             if os.path.isdir(df):
                 print("folder testing df is finished")
             else:
                 os.mkdir(df)
 
             # Testing
-            nv = os.path.join(test_dir, 'nv')
+            nv = os.path.join(self.test_dir, 'nv')
             if os.path.isdir(nv):
                 print("folder testing nv is finished")
             else:
                 os.mkdir(nv)
 
-            mel = os.path.join(test_dir, 'mel')
+            mel = os.path.join(self.test_dir, 'mel')
             if os.path.isdir(mel):
                 print("folder testing mel is finished")
             else:
                 os.mkdir(mel)
 
-            bkl = os.path.join(test_dir, 'bkl')
+            bkl = os.path.join(self.test_dir, 'bkl')
             if os.path.isdir(bkl):
                 print("folder testing bkl is finished")
             else:
                 os.mkdir(bkl)
 
-            bcc = os.path.join(test_dir, 'bcc')
+            bcc = os.path.join(self.test_dir, 'bcc')
             if os.path.isdir(bcc):
                 print("folder testing bcc is finished")
             else:
                 os.mkdir(bcc)
 
-            akiec = os.path.join(test_dir, 'akiec')
+            akiec = os.path.join(self.test_dir, 'akiec')
             if os.path.isdir(akiec):
                 print("folder testing akiec is finished")
             else:
                 os.mkdir(akiec)
 
-            vasc = os.path.join(test_dir, 'vasc')
+            vasc = os.path.join(self.test_dir, 'vasc')
             if os.path.isdir(vasc):
                 print("folder testing vasc is finished")
             else:
                 os.mkdir(vasc)
 
-            df = os.path.join(test_dir, 'df')
+            df = os.path.join(self.test_dir, 'df')
             if os.path.isdir(df):
                 print("folder testing df is finished")
             else:
