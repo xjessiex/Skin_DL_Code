@@ -7,25 +7,31 @@ import sys
 
 if __name__ == "__main__":
 
-    DatasetDir = sys.argv[1] # '/home/mgs/PycharmProjects/Skin_DL/skin-cancer-mnist-ham10000/'
+    DatasetDir = sys.argv[1] # '/home/mgs/PycharmProjects/Skin_DL/skin-cancer-mnist-ham10000/' # sys.argv[1] # '/home/mgs/PycharmProjects/Skin_DL/skin-cancer-mnist-ham10000/'
     CsvDir = DatasetDir
-    BaseDir = sys.argv[2] # '/home/mgs/PycharmProjects/Skin_DL/test/'
+    BaseDir = sys.argv[2] # '/home/mgs/PycharmProjects/Skin_DL/test/' # sys.argv[2] # '/home/mgs/PycharmProjects/Skin_DL/test/'
     skin_df = pd.read_csv(os.path.join(CsvDir, 'HAM10000_metadata.csv')) # load in the data
+    src_folder = sys.argv[3] # '/home/mgs/PycharmProjects/Skin_DL/images/' # sys.argv[3]  # /home/mgs/PycharmProjects/Skin_DL/images/
 
     flag_createFolder = input("Do you want to create the initialized folder (1/0)?")
 
+    base_dir = BaseDir
+    train_dir = os.path.join(base_dir, 'train_dir')
+    val_dir = os.path.join(base_dir, 'val_dir')
+    test_dir = os.path.join(base_dir, 'test_dir')
+
     if flag_createFolder == '1':
         dataset_dir = DatasetDir
-        base_dir = BaseDir
+
         os.listdir(dataset_dir)
 
-        train_dir = os.path.join(base_dir, 'train_dir')
+
         os.mkdir(train_dir)
 
-        val_dir = os.path.join(base_dir, 'val_dir')
+
         os.mkdir(val_dir)
 
-        test_dir = os.path.join(base_dir, 'test_dir')
+
         os.mkdir(test_dir)
 
         nv = os.path.join(train_dir, 'nv')
@@ -158,7 +164,9 @@ if __name__ == "__main__":
 
     # This is a dictionary to read all the data
     imageid_path_dict = {os.path.splitext(os.path.basename(x))[0]: x
-                         for x in glob(os.path.join(CsvDir, '*', '*.jpg'))}
+                         for x in glob(os.path.join(src_folder, '*.jpg'))}
+
+    print(imageid_path_dict)
 
     # Different lesion type
     lesion_type_dict = {
@@ -206,81 +214,69 @@ if __name__ == "__main__":
     df_val = X_val
 
     # Save the images to the folder -- this is im
-    folder_1 = os.listdir(DatasetDir + 'HAM10000_images_part_1')
-    folder_2 = os.listdir(DatasetDir + 'HAM10000_images_part_2')
+    folder = os.listdir(src_folder)
+    # folder_2 = os.listdir(DatasetDir + 'HAM10000_images_part_2')
 
     train_list = list(df_train['image_id'])
     val_list = list(df_val['image_id'])
     test_list = list(df_test['image_id'])
 
+    print(train_list)
+
     import shutil
 
     skin_df.set_index('image_id', inplace=True)
+    print(skin_df.head())
+    print(skin_df.shape)
 
-    src1 = DatasetDir + 'HAM10000_images_part_1/'
-    src2 = DatasetDir + 'HAM10000_images_part_2/'
+    # src1 = DatasetDir + 'HAM10000_images_part_1/'
+    # src2 = DatasetDir + 'HAM10000_images_part_2/'
 
-    print(src1)
-    print(src2)
-
+    # print(src1)
+    # print(src2)
+    #
     # Transfer the train images
-    for image in train_list:
-        fname = image + '.jpg'
-        label = skin_df.loc[image, 'dx']
-        if fname in folder_1:
-            # source path to image
-            src = os.path.join(src1, fname)
-            # destination path to image
-            dst = os.path.join(train_dir, label, fname)
-            print(dst)
-            # copy the image from the source to the destination
-            shutil.copyfile(src, dst)
-        if fname in folder_2:
-            # source path to image
-            src = os.path.join(src2, fname)
-            # destination path to image
-            dst = os.path.join(train_dir, label, fname)
-            print(dst)
-            # copy the image from the source to the destination
-            shutil.copyfile(src, dst)
+    flag_copyimg = input("Do you want to copy the images?")
+    if flag_copyimg == '1':
+        for image in train_list:
+            # print(image)
+            fname = image + '.jpg'
+            label = skin_df.loc[image, 'dx']
+            # print(label)
+            # print(fname in folder)
+            if fname in folder:
+                # source path to image
+                src = os.path.join(src_folder, fname)
+                # destination path to image
+                dst = os.path.join(train_dir, label, fname)
+                shutil.copyfile(src, dst)
+                print(dst)
 
-    # Transfer the val images
-    for image in val_list:
-        fname = image + '.jpg'
-        label = skin_df.loc[image, 'dx']
-        if fname in folder_1:
-            # source path to image
-            src = os.path.join(src1, fname)
-            # destination path to image
-            dst = os.path.join(val_dir, label, fname)
-            # copy the image from the source to the destination
-            shutil.copyfile(src, dst)
-        if fname in folder_2:
-            # source path to image
-            src = os.path.join(src2, fname)
-            # destination path to image
-            dst = os.path.join(val_dir, label, fname)
-            # copy the image from the source to the destination
-            shutil.copyfile(src, dst)
+        # Transfer the val images
+        for image in val_list:
+            fname = image + '.jpg'
+            label = skin_df.loc[image, 'dx']
+            if fname in folder:
+                # source path to image
+                src = os.path.join(src_folder, fname)
+                # destination path to image
+                dst = os.path.join(val_dir, label, fname)
+                # copy the image from the source to the destination
+                shutil.copyfile(src, dst)
+                print(dst)
 
-    # Transfer the test images
-    for image in test_list:
-        fname = image + '.jpg'
-        label = skin_df.loc[image, 'dx']
-        if fname in folder_1:
-            # source path to image
-            src = os.path.join(src1, fname)
-            # destination path to image
-            dst = os.path.join(test_dir, label, fname)
-            # copy the image from the source to the destination
-            shutil.copyfile(src, dst)
-        if fname in folder_2:
-            # source path to image
-            src = os.path.join(src2, fname)
-            # destination path to image
-            dst = os.path.join(test_dir, label, fname)
-            # copy the image from the source to the destination
-            shutil.copyfile(src, dst)
+        # Transfer the test images
+        for image in test_list:
+            fname = image + '.jpg'
+            label = skin_df.loc[image, 'dx']
+            if fname in folder:
+                # source path to image
+                src = os.path.join(src_folder, fname)
+                # destination path to image
+                dst = os.path.join(test_dir, label, fname)
+                # copy the image from the source to the destination
+                shutil.copyfile(src, dst)
+                print(dst)
 
     # Set up the generator
     train_path = BaseDir + 'train_dir'
