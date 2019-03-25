@@ -4,6 +4,7 @@ import pandas as pd
 import os
 from glob import glob
 import sys
+import shutil
 from sklearn.model_selection import train_test_split
 import keras
 from keras.preprocessing.image import ImageDataGenerator
@@ -233,8 +234,6 @@ class Skin_Server():
 
         print(train_list)
 
-        import shutil
-
         self.skin_df.set_index('image_id', inplace=True)
         print(self.skin_df.head())
         print(self.skin_df.shape)
@@ -294,7 +293,9 @@ class Skin_Server():
         num_val_samples = len(self.df_val)
         train_batch_size = 10
         val_batch_size = 10
-        image_size = 224
+        # image_size = 224
+        img_h = 256
+        img_w = 192
         train_steps = np.ceil(num_train_samples / train_batch_size)
         val_steps = np.ceil(num_val_samples / val_batch_size)
 
@@ -311,13 +312,13 @@ class Skin_Server():
 
         # Create the batches for training
         train_batches = datagen.flow_from_directory(train_path,
-                                                    target_size = (image_size,image_size),
+                                                    target_size = (img_h, img_w),
                                                     batch_size  = train_batch_size)
         valid_batches = datagen.flow_from_directory(valid_path,
-                                                    target_size = (image_size,image_size),
+                                                    target_size = (img_h, img_w),
                                                     batch_size  = val_batch_size)
         test_batches = datagen.flow_from_directory(test_path,
-                                                    target_size = (image_size,image_size),
+                                                    target_size = (img_h, img_w),
                                                     batch_size  = 1,
                                                     shuffle=False)
 
@@ -383,6 +384,10 @@ class Skin_Server():
         print('val_top_2_acc:', val_top_2_acc)
         print('val_top_3_acc:', val_top_3_acc)
 
+    def DataAug(self):
+
+        # Data Augmentation for further application
+        a = 1
 if __name__ == "__main__":
 
     test = Skin_Server()
