@@ -3,7 +3,6 @@ import numpy as np
 import pandas as pd
 import os
 from glob import glob
-import seaborn as sns
 import sys
 
 if __name__ == "__main__":
