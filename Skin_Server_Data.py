@@ -362,6 +362,21 @@ if __name__ == "__main__":
                                   class_weight=class_weights,
                                   validation_data=valid_batches,
                                   validation_steps=val_steps,
-                                  epochs=1, verbose=1,
+                                  epochs = 30, verbose=1,
                                   callbacks=callbacks_list)
     model.save(filepath)
+    val_loss, val_cat_acc, val_top_2_acc, val_top_3_acc = model.evaluate_generator(test_batches, steps=len(df_val))
+    print('val_loss:', val_loss)
+    print('val_cat_acc:', val_cat_acc)
+    print('val_top_2_acc:', val_top_2_acc)
+    print('val_top_3_acc:', val_top_3_acc)
+
+    print("The new model")
+    model.load_weights(BaseDir + "MobileNet.h5")
+
+    val_loss, val_cat_acc, val_top_2_acc, val_top_3_acc = model.evaluate_generator(test_batches, steps=len(df_val))
+
+    print('val_loss:', val_loss)
+    print('val_cat_acc:', val_cat_acc)
+    print('val_top_2_acc:', val_top_2_acc)
+    print('val_top_3_acc:', val_top_3_acc)
