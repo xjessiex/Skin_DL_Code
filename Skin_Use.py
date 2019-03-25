@@ -294,8 +294,8 @@ class Skin_Server():
         train_batch_size = 10
         val_batch_size = 10
         # image_size = 224
-        img_h = 256
-        img_w = 192
+        img_h = 224
+        img_w = 224
         train_steps = np.ceil(num_train_samples / train_batch_size)
         val_steps = np.ceil(num_val_samples / val_batch_size)
 
@@ -392,11 +392,6 @@ class Skin_Server():
         print('val_top_2_acc:', val_top_2_acc)
         print('val_top_3_acc:', val_top_3_acc)
 
-
-    def DataAug(self):
-
-        # Data Augmentation for further application
-        a = 1
 if __name__ == "__main__":
 
     test = Skin_Server()
