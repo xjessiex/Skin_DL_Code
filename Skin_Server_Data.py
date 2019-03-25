@@ -350,7 +350,7 @@ if __name__ == "__main__":
     }
 
     from keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
-    filepath = BaseDir + "Mobile.h5"
+    filepath = BaseDir + "MobileNet.h5"
     checkpoint = ModelCheckpoint(filepath, monitor='val_top_3_accuracy', verbose=1,
                                  save_best_only=True, mode='max')
 
@@ -364,3 +364,4 @@ if __name__ == "__main__":
                                   validation_steps=val_steps,
                                   epochs=1, verbose=1,
                                   callbacks=callbacks_list)
+    model.save(filepath)
