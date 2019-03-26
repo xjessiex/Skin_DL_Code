@@ -323,7 +323,7 @@ class Skin_Server():
                                                     shuffle=False)
 
         # Load the pretrain model from keras.applications
-        mobile = keras.applications.mobilenet.MobileNet(Input_tensor = Input(shape=(64, 64, 3)))
+        mobile = keras.applications.mobilenet.MobileNet(input_tensor = Input(shape=(64, 64, 3)))
 
         # Fine tune the model for the last few layers
         x = mobile.layers[-6].output
