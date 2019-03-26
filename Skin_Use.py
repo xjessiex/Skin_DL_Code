@@ -13,6 +13,7 @@ from keras.models import Model
 from keras.metrics import categorical_accuracy, top_k_categorical_accuracy
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
+from keras.layers import Input
 
 class Skin_Server():
 
@@ -293,8 +294,8 @@ class Skin_Server():
         num_val_samples = len(self.df_val)
         train_batch_size = 10
         val_batch_size = 10
-        img_h = 64
-        img_w = 64
+        img_h = 224
+        img_w = 224
         train_steps = np.ceil(num_train_samples / train_batch_size)
         val_steps = np.ceil(num_val_samples / val_batch_size)
 
@@ -311,24 +312,25 @@ class Skin_Server():
 
         # Create the batches for training
         train_batches = datagen.flow_from_directory(train_path,
-                                                    target_size = (img_h, img_w),
+                                                    target_size = (64, 64),
                                                     batch_size  = train_batch_size)
         valid_batches = datagen.flow_from_directory(valid_path,
-                                                    target_size = (img_h, img_w),
+                                                    target_size = (64, 64),
                                                     batch_size  = val_batch_size)
         test_batches = datagen.flow_from_directory(test_path,
-                                                    target_size = (img_h, img_w),
+                                                    target_size = (64, 64),
                                                     batch_size  = 1,
                                                     shuffle=False)
 
         # Load the pretrain model from keras.applications
-        mobile = keras.applications.mobilenet.MobileNet()
+        mobile = keras.applications.mobilenet.MobileNet(Input_tensor = Input(shape=(64, 64, 3)))
 
         # Fine tune the model for the last few layers
         x = mobile.layers[-6].output
         x = Dropout(0.25)(x)
         predictions = Dense(7, activation='softmax')(x)
         model = Model(inputs = mobile.input, outputs = predictions)
+        model.summary()
 
         for layer in model.layers[:-23]:
             layer.trainable = False
