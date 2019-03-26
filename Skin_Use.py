@@ -293,22 +293,21 @@ class Skin_Server():
         num_val_samples = len(self.df_val)
         train_batch_size = 10
         val_batch_size = 10
-        # image_size = 224
-        img_h = 224
-        img_w = 224
+        img_h = 64
+        img_w = 64
         train_steps = np.ceil(num_train_samples / train_batch_size)
         val_steps = np.ceil(num_val_samples / val_batch_size)
 
         # Set up the data generator
         datagen = ImageDataGenerator(preprocessing_function = keras.applications.mobilenet.preprocess_input,
-                                    rotation_range=180,
-                                    width_shift_range=0.1,
-                                    height_shift_range=0.1,
-                                    zoom_range=0.1,
-                                    horizontal_flip=True,
-                                    vertical_flip=True,
-                                    #brightness_range=(0.9,1.1),
-                                    fill_mode='nearest')
+                                    rotation_range = 180,
+                                    width_shift_range = 0.1,
+                                    height_shift_range = 0.1,
+                                    zoom_range = 0.1,
+                                    horizontal_flip = True,
+                                    vertical_flip = True,
+                                    #brightness_range = (0.9,1.1),
+                                    fill_mode = 'nearest')
 
         # Create the batches for training
         train_batches = datagen.flow_from_directory(train_path,
